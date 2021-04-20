@@ -62,10 +62,6 @@ void Error_Handler(void);
 #define B1_GPIO_Port GPIOC
 #define RED_Pin GPIO_PIN_14
 #define RED_GPIO_Port GPIOB
-#define USB_OverCurrent_Pin GPIO_PIN_5
-#define USB_OverCurrent_GPIO_Port GPIOG
-#define USB_PowerSwitchOn_Pin GPIO_PIN_6
-#define USB_PowerSwitchOn_GPIO_Port GPIOG
 #define STLK_RX_Pin GPIO_PIN_7
 #define STLK_RX_GPIO_Port GPIOG
 #define STLK_TX_Pin GPIO_PIN_8
@@ -90,8 +86,8 @@ void Error_Handler(void);
 #define TESTI_GPIO_Port GPIOD
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
-#define LD2_Pin GPIO_PIN_7
-#define LD2_GPIO_Port GPIOB
+#define BLUE_Pin GPIO_PIN_7
+#define BLUE_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
