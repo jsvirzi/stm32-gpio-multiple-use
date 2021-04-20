@@ -345,9 +345,9 @@ static void MX_ADC1_Init(void)
   }
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_6;
+  sConfig.Channel = ADC_CHANNEL_7;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
@@ -362,12 +362,18 @@ static void MX_ADC1_Init(void)
 
   ADC123_COMMON->CCR |= (ADC_CCR_VREFEN);
 
-#if 0
-  adc->SQR1 &= ~(ADC_SQR1_SQ1_Msk | ADC_SQR1_L_Msk);
-  adc->SQR1 = (6 << ADC_SQR1_SQ1_Pos) | (0 << ADC_SQR1_L_Pos);
+  adcv = GPIOA->MODER;
+  adcv &= ~(GPIO_MODER_MODE1_Msk);
+  adcv |= (3 << GPIO_MODER_MODE1_Pos);
+  GPIOA->MODER = adcv;
 
-  ptr = &GPIOA->BRR;
-  ptr[1] |= (1 << 6);
+#if 1
+  // adc->SQR1 &= ~(ADC_SQR1_SQ1_Msk | ADC_SQR1_L_Msk);
+  // adc->SQR1 = (6 << ADC_SQR1_SQ1_Pos) | (0 << ADC_SQR1_L_Pos);
+//  ptr = &GPIOA->BRR;
+//  adcv = ptr[1];
+//  adcv |= (1 << 1);
+//  ptr[1] = adcv;
 #endif
 
   /* USER CODE END ADC1_Init 2 */
@@ -572,6 +578,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA2 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG_ADC_CONTROL;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : RED_Pin BLUE_Pin */
   GPIO_InitStruct.Pin = RED_Pin|BLUE_Pin;
