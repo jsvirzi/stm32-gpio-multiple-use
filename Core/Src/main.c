@@ -134,10 +134,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
   USART_TypeDef *uart = USART2;
+  int cntr = 0;
 
   while (1)
   {
-	  // uart->TDR = 'a';
 
 	  ADC_TypeDef *adc = ADC1;
 	  adc->CR |= (ADC_CR_ADSTART);
@@ -145,7 +145,8 @@ int main(void)
 	  adcv = adc->DR;
 
 #if 1
-	  int n = snprintf(str, sizeof (str), "ADC=0x%4.4x\r\n", adcv);
+	  ++cntr;
+	  int n = snprintf(str, sizeof (str), "%4.4d ADC=0x%4.4x\r\n", cntr, adcv);
 	  uart_send(str, n);
 #endif
 
@@ -341,13 +342,17 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   ADC_TypeDef *adc = ADC1;
+
+#if 1
   adc->CR &= ~(ADC_CR_ADEN);
   adc->SQR1 &= ~(ADC_SQR1_SQ1_Msk | ADC_SQR1_L_Msk);
-  adc->SQR1 = (6 << ADC_SQR1_SQ1_Pos) | (1 << ADC_SQR1_L_Pos);
-  adc->CR |= (ADC_CR_ADEN);
+  adc->SQR1 = (6 << ADC_SQR1_SQ1_Pos) | (0 << ADC_SQR1_L_Pos);
 
   ptr = &GPIOA->BRR;
   ptr[1] |= (1 << 6);
+#endif
+
+  adc->CR |= (ADC_CR_ADEN);
 
   /* USER CODE END ADC1_Init 2 */
 
