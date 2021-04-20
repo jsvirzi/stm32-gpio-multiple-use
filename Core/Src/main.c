@@ -79,6 +79,19 @@ void uart_send(char *s, int n) {
 	while ((uart->ISR & USART_ISR_TXE) == 0) { ; }
 }
 
+uint32_t calibrate_adc(ADC_TypeDef *adc)
+{
+	adc->CR &= ~(ADC_CR_DEEPPWD);
+	adc->CR |= (ADC_CR_ADVREGEN);
+	HAL_Delay(250);
+	adc->CR &= ~(ADC_CR_ADEN);
+	adc->CR &= ~(ADC_CR_ADCALDIF);
+	adc->CR |= (ADC_CR_ADCAL);
+	while (adc->CR & ADC_CR_ADCAL) { ; }
+	uint32_t cal_fact = adc->CALFACT;
+	return cal_fact;
+}
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -127,6 +140,13 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+  ADC_TypeDef *adc = ADC1;
+  HAL_Delay(1000); /* after enabling vref */
+
+  calibrate_adc(adc);
+
+  adc->CR |= (ADC_CR_ADEN);
+
   USART_TypeDef *uart = USART2;
   int cntr = 0;
 
@@ -134,15 +154,17 @@ int main(void)
   {
 
 	  ADC_TypeDef *adc = ADC1;
-	  adc->CR |= (ADC_CR_ADSTART);
-	  HAL_Delay(500);
-	  adcv = adc->DR;
+	  if (adc->CR & ADC_CR_ADEN) {
+		  adc->SQR1 = (6 << ADC_SQR1_SQ1_Pos);
+		  adc->CR |= (ADC_CR_ADSTART);
+		  while (adc->CR & ADC_CR_ADSTART) { ; }
+		  HAL_Delay(100);
+		  adcv = adc->DR;
+		  ++cntr;
+		  int n = snprintf(str, sizeof (str), "%4.4d ADC=0x%4.4x\r\n", cntr, adcv);
+		  uart_send(str, n);
+	  }
 
-#if 1
-	  ++cntr;
-	  int n = snprintf(str, sizeof (str), "%4.4d ADC=0x%4.4x\r\n", cntr, adcv);
-	  uart_send(str, n);
-#endif
 
 #if 0
 	  HAL_Delay(500);
@@ -325,7 +347,7 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_6;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
@@ -336,20 +358,17 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   ADC_TypeDef *adc = ADC1;
-  ADC_CommonTypeDef *adc_common = 0;
+  adc->CR &= ~(ADC_CR_ADEN);
 
-  adc->
+  ADC123_COMMON->CCR |= (ADC_CCR_VREFEN);
 
 #if 0
-  adc->CR &= ~(ADC_CR_ADEN);
   adc->SQR1 &= ~(ADC_SQR1_SQ1_Msk | ADC_SQR1_L_Msk);
   adc->SQR1 = (6 << ADC_SQR1_SQ1_Pos) | (0 << ADC_SQR1_L_Pos);
 
   ptr = &GPIOA->BRR;
   ptr[1] |= (1 << 6);
 #endif
-
-  adc->CR |= (ADC_CR_ADEN);
 
   /* USER CODE END ADC1_Init 2 */
 
